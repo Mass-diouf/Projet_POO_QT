@@ -1,0 +1,5 @@
+#include "fonctionhachage.h"
+
+
+
+

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1032</width>
+    <height>526</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1032</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuBASE">
+    <property name="title">
+     <string>BASE</string>
+    </property>
+    <addaction name="actionCHARGER"/>
+    <addaction name="actionAFFICHER"/>
+    <addaction name="actionTAILLE"/>
+    <addaction name="actionSAUVEGARDER"/>
+   </widget>
+   <widget class="QMenu" name="menuMAISON">
+    <property name="title">
+     <string>MAISON</string>
+    </property>
+    <addaction name="actionRECHERCHER"/>
+    <addaction name="actionSUPPRIMER"/>
+    <addaction name="actionINSERER"/>
+   </widget>
+   <widget class="QMenu" name="menuFONCTION_HACHAGE">
+    <property name="title">
+     <string>FONCTION HACHAGE</string>
+    </property>
+    <addaction name="actionF1"/>
+    <addaction name="actionF2"/>
+    <addaction name="actionF3"/>
+    <addaction name="actionSANS_HACHAGE"/>
+   </widget>
+   <widget class="QMenu" name="menuCOMPARAISON">
+    <property name="title">
+     <string>COMPARAISON </string>
+    </property>
+    <addaction name="actionCOURBE_HVS"/>
+    <addaction name="actionCOURBE_f1_VS_f2"/>
+   </widget>
+   <widget class="QMenu" name="menuQUITTER">
+    <property name="title">
+     <string>QUITTER</string>
+    </property>
+   </widget>
+   <addaction name="menuBASE"/>
+   <addaction name="menuMAISON"/>
+   <addaction name="menuFONCTION_HACHAGE"/>
+   <addaction name="menuCOMPARAISON"/>
+   <addaction name="menuQUITTER"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionCHARGER">
+   <property name="text">
+    <string>CHARGER</string>
+   </property>
+  </action>
+  <action name="actionAFFICHER">
+   <property name="text">
+    <string>AFFICHER</string>
+   </property>
+  </action>
+  <action name="actionTAILLE">
+   <property name="text">
+    <string>TAILLE</string>
+   </property>
+  </action>
+  <action name="actionSAUVEGARDER">
+   <property name="text">
+    <string>SAUVEGARDER</string>
+   </property>
+  </action>
+  <action name="actionRECHERCHER">
+   <property name="text">
+    <string>RECHERCHER</string>
+   </property>
+  </action>
+  <action name="actionSUPPRIMER">
+   <property name="text">
+    <string>SUPPRIMER</string>
+   </property>
+  </action>
+  <action name="actionINSERER">
+   <property name="text">
+    <string>INSERER</string>
+   </property>
+  </action>
+  <action name="actionF1">
+   <property name="text">
+    <string>f1</string>
+   </property>
+  </action>
+  <action name="actionF2">
+   <property name="text">
+    <string>f2</string>
+   </property>
+  </action>
+  <action name="actionF3">
+   <property name="text">
+    <string>f3</string>
+   </property>
+  </action>
+  <action name="actionSANS_HACHAGE">
+   <property name="text">
+    <string>SANS HACHAGE</string>
+   </property>
+  </action>
+  <action name="actionCOURBE_HVS">
+   <property name="text">
+    <string>COURBE HVS</string>
+   </property>
+  </action>
+  <action name="actionCOURBE_f1_VS_f2">
+   <property name="text">
+    <string>COURBE f1 VS f2</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
