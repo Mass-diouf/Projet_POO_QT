@@ -5,6 +5,10 @@
 #-------------------------------------------------
 
 QT       += core gui
+QT += sql
+
+
+
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -18,14 +22,18 @@ SOURCES += main.cpp\
     tablehachage.cpp \
     maisonform.cpp \
     maisonviewer.cpp \
-    maisonlisteviewer.cpp
+    maisonlisteviewer.cpp \
+    fonctionhachage.cpp \
+    maisondao.cpp
 
 HEADERS  += mainwindow.h \
     maison.h \
     tablehachage.h \
     maisonform.h \
     maisonviewer.h \
-    maisonlisteviewer.h
+    maisonlisteviewer.h \
+    fonctionhachage.h \
+    maisondao.h
 
 FORMS    += \
     maisonform.ui \

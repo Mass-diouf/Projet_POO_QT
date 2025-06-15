@@ -1,166 +1,223 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <QMessageBox>
-#include "ui_maisonform.h"
-#include "maisonform.h"
-#include <QFile>
-#include "fonctionhachage.h"
+
+// 🔹 Formulaires et fenêtres annexes
 #include "maisonform.h"
 #include "maisonlisteviewer.h"
 
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    table(20,hachage1)  // 👈 initialisation correcte
+
+
+
+// 🔹 Qt
+#include <QMessageBox>
+#include <QInputDialog>
+#include <QSqlQuery>
+#include <QSqlError>
+#include <QVariant>
+
+// 🔹 Table de hachage
+#include "tablehachage.h"
+#include "fonctionhachage.h"
+
+
+
+
+// 🔹 Base de données globale
+QSqlDatabase globalDb;
+
+// 🔸 Constructeur et destructeur
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent),
+      ui(new Ui::MainWindow),
+      table(101, FonctionsHachage::hachage1)  // Initialisation avec F1 par défaut
 {
     ui->setupUi(this);
+
+    globalDb = QSqlDatabase::addDatabase("QSQLITE");
+    globalDb.setDatabaseName("maisons.db");
+
+    if (!globalDb.open()) {
+        QMessageBox::critical(this, "Erreur base données",
+                              "Impossible d'ouvrir la base de données : " + globalDb.lastError().text());
+        qApp->quit();
+    } else {
+        QSqlQuery query(globalDb);
+        query.exec("CREATE TABLE IF NOT EXISTS maisons ("
+                   "cle TEXT PRIMARY KEY,"
+                   "type TEXT,"
+                   "standing TEXT,"
+                   "nbChambres INTEGER,"
+                   "nbToilettes INTEGER,"
+                   "photos TEXT,"
+                   "description TEXT)");
+    }
 }
 
 MainWindow::~MainWindow()
 {
+    if (globalDb.isOpen())
+        globalDb.close();
     delete ui;
 }
 
+
+
+
+// 🔹 MENU : BASE DE DONNÉES
+
 void MainWindow::on_pushButtonInsererMaison_clicked()
 {
-    MaisonForm dlg(this);   // fenêtre modale
-    dlg.exec();             // ouvre la page MaisonForm
+    MaisonForm dlg(this);
+    if (dlg.exec() == QDialog::Accepted) {
+        Maison maison = dlg.getMaison();
+
+        // Conversion QVector<QString> en QStringList puis en chaîne
+        QVector<QString> vectPhotos = maison.getCheminsPhotos();
+        QStringList listPhotos;
+        for (const QString &s : vectPhotos) {
+            listPhotos << s;
+        }
+        QString photosConcat = listPhotos.join(";");
+
+        // Préparation de la requête
+        QSqlQuery query;
+        query.prepare("INSERT OR REPLACE INTO maisons "
+                      "(cle, type, standing, nbChambres, nbToilettes, photos, description) "
+                      "VALUES (:cle, :type, :standing, :nbChambres, :nbToilettes, :photos, :description)");
+
+        query.bindValue(":cle", maison.getCle());
+        query.bindValue(":type", maison.getType());
+        query.bindValue(":standing", maison.getStanding());
+        query.bindValue(":nbChambres", maison.getNbChambres());
+        query.bindValue(":nbToilettes", maison.getNbToilettes());
+        query.bindValue(":photos", photosConcat);
+        query.bindValue(":description", maison.getDescription());
+
+        if (!query.exec()) {
+            QMessageBox::warning(this, "Erreur insertion DB",
+                                 "Erreur SQL : " + query.lastError().text());
+        } else {
+            QMessageBox::information(this, "Succès", "Maison ajoutée !");
+        }
+    }
 }
-
-
-// MENU BASE
 
 void MainWindow::on_actionCHARGER_triggered()
 {
-    QString nomFichier = QFileDialog::getOpenFileName(
-        this,
-        "Charger la base",
-        "",
-        "Fichiers CSV (*.csv)"
-    );
-
-    if (nomFichier.isEmpty())
-        return;
-
-    QFile fichier(nomFichier);
-    if (!fichier.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Erreur", "Impossible d'ouvrir le fichier.");
+    QSqlQuery query(globalDb);
+    if (!query.exec("SELECT * FROM maisons")) {
+        QMessageBox::warning(this, "Erreur DB", "Impossible de charger les données : " + query.lastError().text());
         return;
     }
 
-    QTextStream in(&fichier);
-    while (!in.atEnd()) {
-        QString ligne = in.readLine();
-        QStringList champs = ligne.split(";");  // ou ',' selon ton format
+    table.clear();  // Vide la table avant de recharger
 
-        if (champs.size() >= 6) {
-            QString cle = champs[0];
-            QString type = champs[1];
-            QString standing = champs[2];
-            int nbChambres = champs[3].toInt();
-            int nbToilettes = champs[4].toInt();
-            QString description = champs[5];
+    while (query.next()) {
+        QString cle = query.value("cle").toString();
+        QString type = query.value("type").toString();
+        QString standing = query.value("standing").toString();
+        int nbChambres = query.value("nbChambres").toInt();
+        int nbToilettes = query.value("nbToilettes").toInt();
+        QString photosStr = query.value("photos").toString();
+        QString description = query.value("description").toString();
 
-            QVector<QString> photos; // à remplir si tu stockes aussi les chemins des photos
+        // Sépare les photos en QVector<QString>
+        QStringList photosList = photosStr.split(";", QString::SplitBehavior::SkipEmptyParts);
 
-            Maison maison(cle, type, standing, nbChambres, nbToilettes, photos, description);
-            table.insertion(maison);
-        }
+        // Crée un objet Maison avec les données
+        QVector<QString> photosVector = photosList.toVector();
+        Maison maison(cle, type, standing, nbChambres, nbToilettes, photosVector, description);
+
+
+        // Ajoute la maison dans la table de hachage
+        table.insertion(maison);
+
     }
 
-    fichier.close();
-    QMessageBox::information(this, "CHARGER", "Données chargées !");
+    QMessageBox::information(this, "Chargement", "Données chargées depuis la base SQLite !");
 }
 
 
 
-/*****  MainWindow.cpp  *****/
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
-#include <QVector>
-#include <QMessageBox>
-
-void MainWindow::on_actionAFFICHER_triggered()
-{
-    /*------------- 1. Récupérer toutes les maisons depuis la table -------------*/
-    QVector<Maison> vectMaisons;
-
-    for (int i = 0; i < table.getCapacite(); ++i)           // parcours chaque « case » de la table
-    {
-        const QList<Maison>& liste = table.getListe(i);     // getListe(i) → QList<Maison>
-        for (const Maison& m : liste)
-            vectMaisons.append(m);                          // on copie dans un QVector
-    }
-
-    if (vectMaisons.isEmpty())
-    {
-        QMessageBox::information(this,
-                                 tr("Aucune maison"),
-                                 tr("La base ne contient aucune maison."));
-        return;
-    }
-
-    /*------------- 2. Ouvrir la fenêtre qui les affiche -------------*/
-    MaisonListeViewer dlg(vectMaisons, this);   // constructeur : (liste, parent)
-    dlg.exec();                                 // fenêtre modale
-}
-
-
-
-
-void MainWindow::on_actionTAILLE_triggered()
-{
-
-
-    QMessageBox::information(nullptr, "TAILLE de la table EST :", QString::number(table.size()));
-
-}
 
 void MainWindow::on_actionSAUVEGARDER_triggered()
 {
-    QString nomFichier = QFileDialog::getSaveFileName(this, "Sauvegarder la base", "", "Fichiers CSV (*.csv)");
-    if (nomFichier.isEmpty()) return;
-
-    QFile fichier(nomFichier);
-    if (!fichier.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QMessageBox::warning(this, "Erreur", "Impossible d'ouvrir le fichier.");
+    QSqlQuery query(globalDb);
+    if (!query.exec("DELETE FROM maisons")) {
+        QMessageBox::warning(this, "Erreur DB", "Impossible de vider la table : " + query.lastError().text());
         return;
     }
 
-    QTextStream out(&fichier);
+    bool ok = true;
 
     for (int i = 0; i < table.getCapacite(); ++i) {
         for (const Maison& m : table.getListe(i)) {
-            QStringList listePhotos = QStringList::fromVector(m.getCheminsPhotos());
-            QString photosConcat = listePhotos.join(";");
+            query.prepare("INSERT INTO maisons "
+                          "(cle, type, standing, nbChambres, nbToilettes, photos, description) "
+                          "VALUES (:cle, :type, :standing, :nbChambres, :nbToilettes, :photos, :description)");
 
+            query.bindValue(":cle", m.getCle());
+            query.bindValue(":type", m.getType());
+            query.bindValue(":standing", m.getStanding());
+            query.bindValue(":nbChambres", m.getNbChambres());
+            query.bindValue(":nbToilettes", m.getNbToilettes());
 
-            out << m.getCle() << ","
-                << m.getType() << ","
-                << m.getStanding() << ","
-                << m.getNbChambres() << ","
-                << m.getNbToilettes() << ","
-                << photosConcat << ","
-                << m.getDescription() << "\n";
+            // Conversion QVector<QString> vers QStringList, puis join
+            QStringList photosList = QStringList::fromVector(m.getCheminsPhotos());
+            query.bindValue(":photos", photosList.join(";"));
+
+            query.bindValue(":description", m.getDescription());
+
+            if (!query.exec()) {
+                ok = false;
+                QMessageBox::warning(this, "Erreur insertion DB", "Erreur SQL : " + query.lastError().text());
+                break;
+            }
         }
+        if (!ok) break;
     }
 
-    fichier.close();
-    QMessageBox::information(this, "SAUVEGARDE", "Sauvegarde terminée !");
+    if (ok)
+        QMessageBox::information(this, "SAUVEGARDE", "Données sauvegardées dans la base SQLite !");
+}
+
+void MainWindow::on_actionTAILLE_triggered()
+{
+    // Par exemple, afficher la taille de la table de hachage
+    QMessageBox::information(this, "TAILLE DE LA TABLE", QString::number(table.size()));
 }
 
 
+// 🔹 MENU : MAISON
 
-// MENU MAISON
+void MainWindow::on_actionAFFICHER_triggered()
+{
+    QVector<Maison> vectMaisons;
+
+    for (int i = 0; i < table.getCapacite(); ++i) {
+        const QList<Maison>& liste = table.getListe(i);
+        for (const Maison& m : liste)
+            vectMaisons.append(m);
+    }
+
+    if (vectMaisons.isEmpty()) {
+        QMessageBox::information(this, "Aucune maison", "La base ne contient aucune maison.");
+        return;
+    }
+
+    MaisonListeViewer dlg(vectMaisons, this);
+
+    dlg.exec();
+}
+
+
 void MainWindow::on_actionRECHERCHER_triggered()
 {
     QString cle = QInputDialog::getText(this, "Recherche", "Entrez la clé de la maison :");
+    if (cle.isEmpty()) return;
 
-    if (cle.isEmpty())
-        return;
-
-    Maison* maison = table.get(cle);  // méthode de TableHachage
+    Maison* maison = table.get(cle);
 
     if (maison) {
         QString info = QString("Clé : %1\nType : %2\nStanding : %3\nChambres : %4\nToilettes : %5\nDescription : %6")
@@ -178,53 +235,62 @@ void MainWindow::on_actionRECHERCHER_triggered()
 }
 
 
-
 void MainWindow::on_actionINSERER_triggered()
 {
-    MaisonForm *formulaire = new MaisonForm(this); // le `this` lie la fenêtre principale à la fenêtre secondaire
-    formulaire->exec(); // Affichage en modal (bloque jusqu’à fermeture du formulaire)
+    MaisonForm *formulaire = new MaisonForm(this);
+    formulaire->exec();
 }
-
-
 
 
 void MainWindow::on_actionSUPPRIMER_triggered()
 {
     QString cle = QInputDialog::getText(this, "Suppression", "Entrez la clé de la maison à supprimer :");
-
-    if (cle.isEmpty())
-        return;
+    if (cle.isEmpty()) return;
 
     if (table.suppression(cle)) {
-        QMessageBox::information(this, "Suppression", "Maison supprimée avec succès !");
+        QSqlQuery query(globalDb);
+        query.prepare("DELETE FROM maisons WHERE cle = :cle");
+        query.bindValue(":cle", cle);
+        if (!query.exec()) {
+            QMessageBox::warning(this, "Erreur DB", "Erreur suppression base : " + query.lastError().text());
+        } else {
+            QMessageBox::information(this, "Suppression", "Maison supprimée avec succès !");
+        }
     } else {
         QMessageBox::warning(this, "Erreur", "Maison non trouvée !");
     }
 }
 
 
-// MENU FONCTION HACHAGE
+// 🔹 MENU : FONCTIONS DE HACHAGE
+
 void MainWindow::on_actionF1_triggered()
 {
+    table.changerFonctionHachage(FonctionsHachage::hachage1);
     QMessageBox::information(this, "Hachage F1", "Fonction F1 appliquée !");
 }
 
 void MainWindow::on_actionF2_triggered()
 {
+    table.changerFonctionHachage(FonctionsHachage::hachage2);
     QMessageBox::information(this, "Hachage F2", "Fonction F2 appliquée !");
 }
 
 void MainWindow::on_actionF3_triggered()
 {
+    table.changerFonctionHachage(FonctionsHachage::hachage3);
     QMessageBox::information(this, "Hachage F3", "Fonction F3 appliquée !");
 }
 
 void MainWindow::on_actionSANS_HACHAGE_triggered()
 {
-    QMessageBox::information(this, "Sans Hachage", "Pas de hachage utilisé.");
+    table.changerFonctionHachage(FonctionsHachage::hachageSans);
+    QMessageBox::information(this, "Sans Hachage", "Indexation directe appliquée !");
 }
 
-// MENU COMPARAISON
+
+// 🔹 MENU : COURBES ET
+
 void MainWindow::on_actionCOURBE_HVS_triggered()
 {
     QMessageBox::information(this, "Courbe HVS", "Affichage de la courbe HVS.");
@@ -235,9 +301,15 @@ void MainWindow::on_actionCOURBE_f1_VS_f2_triggered()
     QMessageBox::information(this, "Courbe f1 vs f2", "Affichage de la courbe f1 VS f2.");
 }
 
-// MENU QUITTER
+
+
+
+
+
+
+// QUITTER
+
 void MainWindow::on_actionQUITTER_triggered()
 {
     QApplication::quit();
 }
-

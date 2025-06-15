@@ -15,23 +15,23 @@
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QDialog>
 #include <QtWidgets/QHeaderView>
-#include <QtWidgets/QLabel>
+#include <QtWidgets/QListWidget>
 
 QT_BEGIN_NAMESPACE
 
 class Ui_MaisonListeViewer
 {
 public:
-    QLabel *label;
+    QListWidget *listWidgetMaisons;
 
     void setupUi(QDialog *MaisonListeViewer)
     {
         if (MaisonListeViewer->objectName().isEmpty())
             MaisonListeViewer->setObjectName(QStringLiteral("MaisonListeViewer"));
-        MaisonListeViewer->resize(672, 300);
-        label = new QLabel(MaisonListeViewer);
-        label->setObjectName(QStringLiteral("label"));
-        label->setGeometry(QRect(120, 120, 68, 19));
+        MaisonListeViewer->resize(1302, 670);
+        listWidgetMaisons = new QListWidget(MaisonListeViewer);
+        listWidgetMaisons->setObjectName(QStringLiteral("listWidgetMaisons"));
+        listWidgetMaisons->setGeometry(QRect(40, 30, 1231, 611));
 
         retranslateUi(MaisonListeViewer);
 
@@ -41,7 +41,6 @@ public:
     void retranslateUi(QDialog *MaisonListeViewer)
     {
         MaisonListeViewer->setWindowTitle(QApplication::translate("MaisonListeViewer", "Dialog", 0));
-        label->setText(QApplication::translate("MaisonListeViewer", "bienvenu", 0));
     } // retranslateUi
 
 };

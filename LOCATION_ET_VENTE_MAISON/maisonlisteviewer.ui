@@ -6,24 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>672</width>
-    <height>300</height>
+    <width>1302</width>
+    <height>670</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QLabel" name="label">
+  <widget class="QListWidget" name="listWidgetMaisons">
    <property name="geometry">
     <rect>
-     <x>120</x>
-     <y>120</y>
-     <width>68</width>
-     <height>19</height>
+     <x>40</x>
+     <y>30</y>
+     <width>1231</width>
+     <height>611</height>
     </rect>
-   </property>
-   <property name="text">
-    <string>bienvenu</string>
    </property>
   </widget>
  </widget>

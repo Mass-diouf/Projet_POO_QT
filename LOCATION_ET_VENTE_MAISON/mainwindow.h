@@ -1,13 +1,19 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+
 #include <QFile>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QTextStream>
 #include <QMainWindow>
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlError>
 #include "tablehachage.h"
 #include "fonctionhachage.h"
 #include <QInputDialog>
+#include "maisonlisteviewer.h"
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -20,6 +26,16 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+    // Méthodes pour la gestion de la base SQLite
+    bool ouvrirBase(const QString &dbPath = "maisons_location.sqlite");
+    bool insererMaisonDansBase(const Maison &maison);
+    QVector<Maison> chargerMaisonsDepuisBase();
+    //methode d affichage de la coubre
+    void afficherCourbeComparaison();
+    qint64 mesurerInsertionHachage1(const QVector<Maison>& liste) ;
+    qint64 mesurerInsertionHachage2(const QVector<Maison>& liste) ;
+    qint64 mesurerInsertionHachage3(const QVector<Maison>& liste) ;
 
 private slots:
     void on_pushButtonInsererMaison_clicked();
@@ -47,6 +63,8 @@ private:
     Ui::MainWindow *ui;
     TableHachage table;
 
+    // Objet base SQLite
+    QSqlDatabase database;
 };
 
 #endif // MAINWINDOW_H

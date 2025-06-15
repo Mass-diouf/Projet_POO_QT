@@ -47,7 +47,7 @@ public:
         MaisonViewer->resize(1310, 574);
         labelPhoto = new QLabel(MaisonViewer);
         labelPhoto->setObjectName(QStringLiteral("labelPhoto"));
-        labelPhoto->setGeometry(QRect(640, 100, 451, 321));
+        labelPhoto->setGeometry(QRect(660, 100, 451, 321));
         labelPhoto->setMinimumSize(QSize(300, 200));
         labelPhoto->setScaledContents(true);
         btnPrev = new QPushButton(MaisonViewer);

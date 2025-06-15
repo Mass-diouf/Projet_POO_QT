@@ -1,9 +1,13 @@
-#ifndef MAISONSELISTEVIEWER_H
-#define MAISONSELISTEVIEWER_H
+#ifndef MAISONLISTEVIEWER_H
+#define MAISONLISTEVIEWER_H
+#include <QSqlQuery>
+#include <QSqlError>
+#include <QMessageBox>
+
 #include <QDialog>
-#include <QVBoxLayout>
+#include <QVector>
+#include <QListWidgetItem>
 #include "maison.h"
-#include "maisonviewer.h"
 
 namespace Ui {
 class MaisonListeViewer;
@@ -14,11 +18,18 @@ class MaisonListeViewer : public QDialog
     Q_OBJECT
 
 public:
-    explicit MaisonListeViewer(const QVector<Maison>& maisons, QWidget *parent = nullptr);
+    explicit MaisonListeViewer(QWidget *parent = nullptr);
+    explicit MaisonListeViewer(const QVector<Maison> &maisons, QWidget *parent = nullptr);
     ~MaisonListeViewer();
+
+private slots:
+    void ouvrirMaisonViewer(QListWidgetItem *item);
 
 private:
     Ui::MaisonListeViewer *ui;
+    QVector<Maison> maisons;
+
+    void loadMaisons();
 };
 
-#endif // MAISONSESLISTVIEWER_H
+#endif // MAISONLISTEVIEWER_H

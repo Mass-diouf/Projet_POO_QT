@@ -20,7 +20,7 @@
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_MaisonViewer_t {
     QByteArrayData data[4];
-    char stringdata[40];
+    char stringdata[52];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -30,12 +30,13 @@ struct qt_meta_stringdata_MaisonViewer_t {
 static const qt_meta_stringdata_MaisonViewer_t qt_meta_stringdata_MaisonViewer = {
     {
 QT_MOC_LITERAL(0, 0, 12), // "MaisonViewer"
-QT_MOC_LITERAL(1, 13, 12), // "afficherPrec"
-QT_MOC_LITERAL(2, 26, 0), // ""
-QT_MOC_LITERAL(3, 27, 12) // "afficherSuiv"
+QT_MOC_LITERAL(1, 13, 18), // "on_btnPrev_clicked"
+QT_MOC_LITERAL(2, 32, 0), // ""
+QT_MOC_LITERAL(3, 33, 18) // "on_btnNext_clicked"
 
     },
-    "MaisonViewer\0afficherPrec\0\0afficherSuiv"
+    "MaisonViewer\0on_btnPrev_clicked\0\0"
+    "on_btnNext_clicked"
 };
 #undef QT_MOC_LITERAL
 
@@ -68,8 +69,8 @@ void MaisonViewer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id
     if (_c == QMetaObject::InvokeMetaMethod) {
         MaisonViewer *_t = static_cast<MaisonViewer *>(_o);
         switch (_id) {
-        case 0: _t->afficherPrec(); break;
-        case 1: _t->afficherSuiv(); break;
+        case 0: _t->on_btnPrev_clicked(); break;
+        case 1: _t->on_btnNext_clicked(); break;
         default: ;
         }
     }

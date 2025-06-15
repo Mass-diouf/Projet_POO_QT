@@ -1,9 +1,15 @@
 #include "tablehachage.h"
 
-TableHachage::TableHachage(int cap, int (*fctHachage)(const QString&))
+TableHachage::TableHachage(int cap, unsigned int (*fctHachage)(const QString&))
     : capacite(cap), taille(0), fonctionHachage(fctHachage)
 {
-    table.resize(capacite);  // crée capacite listes vides
+    table.resize(capacite);  // redimensionne le tableau
+}
+
+void TableHachage::clear() {
+    for (int i = 0; i < table.size(); ++i) {
+        table[i].clear();
+    }
 }
 
 void TableHachage::insertion(const Maison& maison)
@@ -29,33 +35,31 @@ void TableHachage::insertion(const Maison& maison)
 
 bool TableHachage::contient(const QString& cle) const
 {
-    int index = fonctionHachage(cle);
-    index %= capacite;
-    if (index < 0) index += capacite;
+    int index = fonctionHachage(cle) % capacite;
+    const liste& l = table[index];
 
-    const liste& listeCellule = table[index];
-
-    for (const Maison& m : listeCellule) {
+    for (const Maison& m : l) {
         if (m.getCle() == cle)
             return true;
     }
+
     return false;
 }
 
+
 Maison* TableHachage::get(const QString& cle)
 {
-    int index = fonctionHachage(cle);
-    index %= capacite;
-    if (index < 0) index += capacite;
+    int index = fonctionHachage(cle) % capacite;
+    liste& l = table[index];
 
-    liste& listeCellule = table[index];
-
-    for (Maison& m : listeCellule) {
+    for (Maison& m : l) {
         if (m.getCle() == cle)
             return &m;
     }
+
     return nullptr;
 }
+
 
 bool TableHachage::suppression(const QString& cle)
 {
@@ -85,7 +89,8 @@ bool TableHachage::estVide() const
     return taille == 0;
 }
 
-void TableHachage::changerFonctionHachage(int (*nouvelleFct)(const QString&))
+void TableHachage::changerFonctionHachage(unsigned int (*nouvelleFct)(const QString&))
+
 {
     fonctionHachage = nouvelleFct;
 
@@ -115,36 +120,4 @@ int TableHachage::getCapacite() const
 }
 
 
-int TableHachage:: hachage1(const QString& cle) {
-    unsigned int hash = 0;
-    unsigned int prime = 31;
-    for (int i = 0; i < cle.size(); ++i) {
-        QChar ch = cle[i];
-        hash = prime * hash + ch.unicode();
-        hash ^= (hash >> 16);
-    }
-    return hash;
-}
 
-int TableHachage:: hachage2(const QString& cle) {
-    unsigned int hash = 0;
-    for (int i = 0; i < cle.size(); ++i) {
-        QChar ch = cle[i];
-        unsigned int value = ch.unicode();
-        hash = hash + value;
-        hash += (hash << 10);
-        hash ^= (hash >> 6);
-    }
-    hash += (hash << 3);
-    hash ^= (hash >> 11);
-    hash += (hash << 15);
-    return hash;
-}
-
-int TableHachage::hachage3 (const QString& cle) {
-    int sigma = 0;
-    for (int i = 0; i < cle.length(); ++i) {
-        sigma += static_cast<int>(cle.at(i).toLatin1());
-    }
-    return sigma;
-}

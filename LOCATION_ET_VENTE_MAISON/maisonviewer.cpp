@@ -1,29 +1,17 @@
 #include "maisonviewer.h"
 #include "ui_maisonviewer.h"
 #include <QPixmap>
-#include <QFileInfo>
+#include <QDebug>
 
-MaisonViewer::MaisonViewer(const Maison& m, QWidget *parent) :
+MaisonViewer::MaisonViewer(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::MaisonViewer),
-    maisonRef(m),
-    indexImg(0)
+    photoIndex(0)
 {
     ui->setupUi(this);
 
-    // Remplir les informations
-    ui->labelCle->setText(maisonRef.getCle());
-    ui->labelType->setText(maisonRef.getType());
-    ui->labelStanding->setText(maisonRef.getStanding());
-    ui->labelChambres->setText(QString::number(maisonRef.getNbChambres()));
-    ui->labelToillettes->setText(QString::number(maisonRef.getNbToilettes()));
-    ui->textEditDescription->setPlainText(maisonRef.getDescription());
-
-    // Connexions des boutons
-    connect(ui->btnPrev, &QPushButton::clicked, this, &MaisonViewer::afficherPrec);
-    connect(ui->btnNext, &QPushButton::clicked, this, &MaisonViewer::afficherSuiv);
-
-    afficherImage();
+    connect(ui->btnPrev, &QPushButton::clicked, this, &MaisonViewer::on_btnPrev_clicked);
+    connect(ui->btnNext, &QPushButton::clicked, this, &MaisonViewer::on_btnNext_clicked);
 }
 
 MaisonViewer::~MaisonViewer()
@@ -31,39 +19,48 @@ MaisonViewer::~MaisonViewer()
     delete ui;
 }
 
-void MaisonViewer::afficherImage()
+void MaisonViewer::afficherMaison(const Maison &maison)
 {
-    const auto& photos = maisonRef.getCheminsPhotos();
+    ui->labelCle->setText("Clé : " + maison.getCle());
+    ui->labelType->setText("Type : " + maison.getType());
+    ui->labelStanding->setText("Standing : " + maison.getStanding());
+    ui->labelChambres->setText("Chambres : " + QString::number(maison.getNbChambres()));
+    ui->labelToillettes->setText("Toilettes : " + QString::number(maison.getNbToilettes()));
+    ui->textEditDescription->setPlainText(maison.getDescription());
 
+    photos = maison.getCheminsPhotos().toList();  // QStringList ou QVector<QString>
+    photoIndex = 0;
+    updatePhotoDisplay();
+}
+
+void MaisonViewer::updatePhotoDisplay()
+{
     if (photos.isEmpty()) {
-        ui->labelPhoto->setText("Aucune image");
+        ui->labelPhoto->clear();
+        ui->labelPhoto->setText("Pas de photo disponible");
         return;
     }
 
-    if (indexImg < 0) indexImg = photos.size() - 1;
-    if (indexImg >= photos.size()) indexImg = 0;
-
-    QString chemin = photos[indexImg];
-    QPixmap pix(chemin);
-
-    if (pix.isNull()) {
-        ui->labelPhoto->setText("Image introuvable");
+    QPixmap pix(photos[photoIndex]);
+    if (!pix.isNull()) {
+        ui->labelPhoto->setPixmap(pix.scaled(ui->labelPhoto->size(), Qt::KeepAspectRatio));
     } else {
-        ui->labelPhoto->setPixmap(pix.scaled(
-            ui->labelPhoto->size(),
-            Qt::KeepAspectRatio,
-            Qt::SmoothTransformation));
+        ui->labelPhoto->setText("Image introuvable");
     }
 }
 
-void MaisonViewer::afficherPrec()
+void MaisonViewer::on_btnNext_clicked()
 {
-    indexImg--;
-    afficherImage();
+    if (photos.isEmpty()) return;
+
+    photoIndex = (photoIndex + 1) % photos.size();
+    updatePhotoDisplay();
 }
 
-void MaisonViewer::afficherSuiv()
+void MaisonViewer::on_btnPrev_clicked()
 {
-    indexImg++;
-    afficherImage();
+    if (photos.isEmpty()) return;
+
+    photoIndex = (photoIndex - 1 + photos.size()) % photos.size();
+    updatePhotoDisplay();
 }
