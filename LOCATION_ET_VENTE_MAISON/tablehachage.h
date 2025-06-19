@@ -14,6 +14,7 @@ private:
     int capacite;
     int taille;
     unsigned int (*fonctionHachage)(const QString&);
+    int collison=0;
 
 
 public:
@@ -22,14 +23,14 @@ public:
     bool contient(const QString& cle) const;
     Maison* get(const QString& cle);
     bool suppression(const QString& cle);
-
+   int col() const;
     int size() const;
     bool estVide() const;
     int getCapacite() const;
     QList<Maison> getListe(int index) const;
     void clear();
 
-    void changerFonctionHachage(unsigned int (*nouvelleFct)(const QString&)); // ✅ Corrigé
+    void changerFonctionHachage(unsigned int (*nouvelleFct)(const QString&));
 
 };
 

@@ -4,34 +4,47 @@ TableHachage::TableHachage(int cap, unsigned int (*fctHachage)(const QString&))
     : capacite(cap), taille(0), fonctionHachage(fctHachage)
 {
     table.resize(capacite);  // redimensionne le tableau
+
 }
 
 void TableHachage::clear() {
     for (int i = 0; i < table.size(); ++i) {
         table[i].clear();
     }
+    taille=0;
+}
+
+int TableHachage:: col() const
+{
+    return collison;
 }
 
 void TableHachage::insertion(const Maison& maison)
 {
-    int index = fonctionHachage(maison.getCle());
-    index %= capacite;
-    if (index < 0) index += capacite;  // sécurité si hash négatif
+    int index = fonctionHachage(maison.getCle()) % capacite;
+    if (index < 0) index += capacite;
 
     liste& listeCellule = table[index];
 
-    // Vérifier si la maison existe déjà (clé identique), si oui remplacer
+    //Rechercher si la maison est déjà présente
     for (Maison& m : listeCellule) {
         if (m.getCle() == maison.getCle()) {
-            m = maison;
-            return;
+            m = maison;  // Remplacer
+            return;      // Pas de collision ici
         }
     }
 
-    // Sinon insérer la maison à la fin de la liste
+    //  Si on arrive ici, la clé n'existe pas encore
+    //  On regarde s'il y avait déjà des maisons : donc collision
+    if (!listeCellule.isEmpty()) {
+        ++collison;  //  Collision détectée
+    }
+
     listeCellule.append(maison);
     ++taille;
 }
+
+
 
 bool TableHachage::contient(const QString& cle) const
 {

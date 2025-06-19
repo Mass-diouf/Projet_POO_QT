@@ -1,31 +1,38 @@
 #include "fonctionhachage.h"
 
-// 1. Somme ASCII (hachage brut)
 unsigned int FonctionsHachage::hachage1(const QString& cle) {
+    unsigned int a = 1, b = 0;
+    const int MOD_ADLER = 65521;
+
+    for (int i = 0; i < cle.size(); ++i) {
+        a = (a + static_cast<unsigned char>(cle[i].toLatin1())) % MOD_ADLER;
+        b = (b + a) % MOD_ADLER;
+    }
+
+    return (b << 16) | a;
+}
+
+
+unsigned int FonctionsHachage::hachage2(const QString& cle) {
+    unsigned int hash = 0;
+    const unsigned int prime = 2654435761; // Knuth
+
+    for (int i = 0; i < cle.size(); ++i) {
+        hash ^= static_cast<unsigned char>(cle[i].toLatin1());
+        hash *= prime;
+    }
+
+    return hash;
+}
+
+
+
+unsigned int FonctionsHachage::hachage3(const QString& cle) {
     unsigned int somme = 0;
     for (int i = 0; i < cle.size(); ++i) {
         somme += static_cast<unsigned char>(cle.at(i).toLatin1());
     }
     return somme;
-}
-
-// 2. Hachage polynomial (base 31) - hachage brut
-unsigned int FonctionsHachage::hachage2(const QString& cle) {
-    unsigned int hash = 0;
-    int base = 31;
-    for (int i = 0; i < cle.size(); ++i) {
-        hash = hash * base + static_cast<unsigned char>(cle.at(i).toLatin1());
-    }
-    return hash;
-}
-
-// 3. Hachage DJB2 - hachage brut
-unsigned int FonctionsHachage::hachage3(const QString& cle) {
-    unsigned int hash = 5381;
-    for (int i = 0; i < cle.size(); ++i) {
-        hash = ((hash << 5) + hash) + static_cast<unsigned char>(cle.at(i).toLatin1()); // hash * 33 + c
-    }
-    return hash;
 }
 
 // 4. Indexation directe (clé entière)

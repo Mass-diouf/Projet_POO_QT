@@ -33,6 +33,7 @@ public:
     QVector<Maison> chargerMaisonsDepuisBase();
     //methode d affichage de la coubre
     void afficherCourbeComparaison();
+    void afficherCourbeF1F2F3();
     qint64 mesurerInsertionHachage1(const QVector<Maison>& liste) ;
     qint64 mesurerInsertionHachage2(const QVector<Maison>& liste) ;
     qint64 mesurerInsertionHachage3(const QVector<Maison>& liste) ;
@@ -43,6 +44,7 @@ private slots:
     void on_actionCHARGER_triggered();
     void on_actionAFFICHER_triggered();
     void on_actionTAILLE_triggered();
+    void on_actionNOMBRE_DE_COLLISION_triggered();
     void on_actionSAUVEGARDER_triggered();
 
     void on_actionRECHERCHER_triggered();

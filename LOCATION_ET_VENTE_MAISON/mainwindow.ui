@@ -20,7 +20,7 @@
      <x>0</x>
      <y>0</y>
      <width>1032</width>
-     <height>31</height>
+     <height>17</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuBASE">
@@ -31,6 +31,7 @@
     <addaction name="actionAFFICHER"/>
     <addaction name="actionTAILLE"/>
     <addaction name="actionSAUVEGARDER"/>
+    <addaction name="actionNOMBRE_DE_COLLISION"/>
    </widget>
    <widget class="QMenu" name="menuMAISON">
     <property name="title">
@@ -131,6 +132,11 @@
   <action name="actionCOURBE_f1_VS_f2">
    <property name="text">
     <string>COURBE f1 VS f2</string>
+   </property>
+  </action>
+  <action name="actionNOMBRE_DE_COLLISION">
+   <property name="text">
+    <string>NOMBRE DE COLLISION</string>
    </property>
   </action>
  </widget>
